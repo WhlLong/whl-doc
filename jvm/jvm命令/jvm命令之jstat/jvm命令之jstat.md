@@ -1,4 +1,22 @@
-[TOC]
+# Table of Contents
+
+* 1 [简介](#简介)
+* 2 [options](#options)
+  * 2.1 [-class](#-class)
+  * 2.2 [-compiler](#-compiler)
+  * 2.3 [-gc](#-gc)
+  * 2.4 [-gcutil](#-gcutil)
+  * 2.5 [-gccause](#-gccause)
+  * 2.6 [-gccapacity](#-gccapacity)
+  * 2.7 [-gcnew](#-gcnew)
+* 3 [使用](#使用)
+  * 3.1 [新生代对象增长的速率](#新生代对象增长的速率)
+  * 3.2 [YGC的触发频率和平均耗时](#ygc的触发频率和平均耗时)
+  * 3.3 [YGC以后对象存活和晋升到老年代的数量](#ygc以后对象存活和晋升到老年代的数量)
+  * 3.4 [FGC触发频率和平均耗时](#fgc触发频率和平均耗时)
+
+
+
 
 
 
