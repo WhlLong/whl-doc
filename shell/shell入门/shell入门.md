@@ -410,15 +410,72 @@ parameter.sh  hello   world
 
 
 
-
-
 ### $#
 
-### $*
+功能描述：获取所有输入参数个数，常用于循环
 
-### $@
+```shell
+[root@iz2zegdhs7pd191av8n8dmz parameter]# vim parameter.sh
+[root@iz2zegdhs7pd191av8n8dmz parameter]# cat parameter.sh
+#!/bin/bash
+echo "$0  $1   $2"
+echo $#
+[root@iz2zegdhs7pd191av8n8dmz parameter]# sh parameter.sh hello world !
+parameter.sh  hello   world
+3
+[root@iz2zegdhs7pd191av8n8dmz parameter]# sh parameter.sh hello world 2 !
+parameter.sh  hello   world
+4
+```
+
+
+
+### $*和$@
+
+功能描述：
+
+$* 和$@这两个变量都代表命令行中所有的参数，不同的是$*把所有的参数看成一个整体,$@把每个参数区分对待
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz parameter]# vim parameter.sh
+[root@iz2zegdhs7pd191av8n8dmz parameter]# cat parameter.sh
+#!/bin/bash
+echo "$0  $1   $2"
+echo $#
+echo $*
+echo $@
+[root@iz2zegdhs7pd191av8n8dmz parameter]# sh parameter.sh 1 2 3
+parameter.sh  1   2
+3
+1 2 3
+1 2 3
+```
+
+
 
 ### $？
+
+功能描述：最后一次执行的命令的返回状态。
+
+如果这个变量的值为0，证明上一个命令正确执行；
+
+如果这个变量的值为非0（具体是哪个数，由命令自己来决定），则证明上一个命令执行不正确了。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz parameter]# sh parameter.sh 1 2 3
+parameter.sh  1   2
+3
+1 2 3
+1 2 3
+[root@iz2zegdhs7pd191av8n8dmz parameter]# echo $?
+0
+[root@iz2zegdhs7pd191av8n8dmz parameter]# sh parameter 1 2 3
+sh: parameter: No such file or directory
+[root@iz2zegdhs7pd191av8n8dmz parameter]# echo $?
+127
+```
+
+
 
 
 
@@ -426,6 +483,145 @@ parameter.sh  hello   world
 
 # Shell中的运算符
 
+## 算术运算符
+
+原生bash不支持简单的数学运算，但是可以通过其他命令来实现，例如 awk 和 expr，expr 最常用。
+
+expr 是一款表达式计算工具，使用它能完成表达式的求值操作，比如两个数相加(**注意使用的是反引号 ` 而不是单引号 '**)。
+
+| 运算符 | 说明                                          | 举例                          |
+| :----- | :-------------------------------------------- | :---------------------------- |
+| +      | 加法                                          | `expr $a + $b` 结果为 30。    |
+| -      | 减法                                          | `expr $a - $b` 结果为 -10。   |
+| \*     | 乘法，                                        | `expr $a \* $b` 结果为  200。 |
+| /      | 除法                                          | `expr $b / $a` 结果为 2。     |
+| %      | 取余                                          | `expr $b % $a` 结果为 0。     |
+| =      | 赋值                                          | a=$b 将把变量 b 的值赋给 a。  |
+| ==     | 相等。用于比较两个数字，相同则返回 true。     | [ $a == $b ] 返回 false。     |
+| !=     | 不相等。用于比较两个数字，不相同则返回 true。 | [ $a != $b ] 返回 true。      |
+
+注意：**expr运算符间要有空格**
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator1.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator1.sh
+#!/bin/bash
+a=10
+b=20
+
+val=`expr $a + $b`
+echo "a + b : $val"
+
+val=`expr $a - $b`
+echo "a - b : $val"
+
+val=`expr $a \* $b`
+echo "a * b : $val"
+
+val=`expr $b / $a`
+echo "b / a : $val"
+
+val=`expr $b % $a`
+echo "b % a : $val"
+
+if [ $a == $b ]
+then
+   echo "a 等于 b"
+fi
+if [ $a != $b ]
+then
+   echo "a 不等于 b"
+fi
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh operator1.sh
+a + b : 30
+a - b : -10
+a * b : 200
+b / a : 2
+b % a : 0
+a 不等于 b
+
+```
+
+
+
+
+
+## 关系运算符
+
+关系运算符只支持数字，不支持字符串，除非字符串的值是数字。
+
+| 运算符 | 说明                                                  | 举例                       |
+| :----- | :---------------------------------------------------- | :------------------------- |
+| -eq    | 检测两个数是否相等，相等返回 true。                   | [ $a -eq $b ] 返回 false。 |
+| -ne    | 检测两个数是否不相等，不相等返回 true。               | [ $a -ne $b ] 返回 true。  |
+| -gt    | 检测左边的数是否大于右边的，如果是，则返回 true。     | [ $a -gt $b ] 返回 false。 |
+| -lt    | 检测左边的数是否小于右边的，如果是，则返回 true。     | [ $a -lt $b ] 返回 true。  |
+| -ge    | 检测左边的数是否大于等于右边的，如果是，则返回 true。 | [ $a -ge $b ] 返回 false。 |
+| -le    | 检测左边的数是否小于等于右边的，如果是，则返回 true。 | [ $a -le $b ] 返回 true。  |
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator2.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator2.sh
+#!/bin/bash
+
+a=10
+b=20
+
+if [ $a -eq $b ]
+then
+	echo "$a -eq $b : a 等于 b"
+else
+	echo "$a -eq $b: a 不等于 b"
+fi
+      
+if [ $a -ne $b ]
+then
+     echo "$a -ne $b: a 不等于 b"
+else
+	 echo "$a -ne $b : a 等于 b"
+fi
+
+if [ $a -gt $b ]
+then
+	 echo "$a -gt $b: a 大于 b"
+else
+	 echo "$a -gt $b: a 不大于 b"
+fi
+
+if [ $a -lt $b ]
+then
+    echo "$a -lt $b: a 小于 b"
+else
+	echo "$a -lt $b: a 不小于 b"
+fi
+	
+if [ $a -ge $b ]
+then
+	 echo "$a -ge $b: a 大于或等于 b"
+else
+	 echo "$a -ge $b: a 小于 b"
+fi
+
+if [ $a -le $b ]
+then
+	echo "$a -le $b: a 小于或等于 b"
+else 
+	echo "$a -le $b: a 大于 b"
+fi
+			
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh operator2.sh
+10 -eq 20: a 不等于 b
+10 -ne 20: a 不等于 b
+10 -gt 20: a 不大于 b
+10 -lt 20: a 小于 b
+10 -ge 20: a 小于 b
+10 -le 20: a 小于或等于 b
+
+```
 
 
 
@@ -433,17 +629,651 @@ parameter.sh  hello   world
 
 
 
+## 布尔运算符
 
-# Shell中的条件判断
+| 运算符 | 说明                                                | 举例                                     |
+| :----- | :-------------------------------------------------- | :--------------------------------------- |
+| !      | 非运算，表达式为 true 则返回 false，否则返回 true。 | [ ! false ] 返回 true。                  |
+| -o     | 或运算，有一个表达式为 true 则返回 true。           | [ $a -lt 20 -o $b -gt 100 ] 返回 true。  |
+| -a     | 与运算，两个表达式都为 true 才返回 true。           | [ $a -lt 20 -a $b -gt 100 ] 返回 false。 |
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator3.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator3.sh
+#!/bin/bash
+
+a=10
+b=20
+
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a == $b: a 等于 b"
+fi
+if [ $a -lt 100 -a $b -gt 15 ]
+then
+    echo "$a 小于 100 且 $b 大于 15 : 返回 true"
+else
+	echo "$a 小于 100 且 $b 大于 15 : 返回 false"
+fi
+if [ $a -lt 100 -o $b -gt 100 ]
+then
+	echo "$a 小于 100 或 $b 大于 100 : 返回 true"
+else
+	echo "$a 小于 100 或 $b 大于 100 : 返回 false"
+fi
+if [ $a -lt 5 -o $b -gt 100 ]
+then
+	echo "$a 小于 5 或 $b 大于 100 : 返回 true"
+else
+	echo "$a 小于 5 或 $b 大于 100 : 返回 false"
+fi
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh  operator3.sh
+10 != 20 : a 不等于 b
+10 小于 100 且 20 大于 15 : 返回 true
+10 小于 100 或 20 大于 100 : 返回 true
+10 小于 5 或 20 大于 100 : 返回 false
+```
 
 
+
+## 逻辑运算符
+
+| 运算符 | 说明       | 举例                                       |
+| :----- | :--------- | :----------------------------------------- |
+| &&     | 逻辑的 AND | [[ $a -lt 100 && $b -gt 100 ]] 返回 false  |
+| \|\|   | 逻辑的 OR  | [[ $a -lt 100 \|\| $b -gt 100 ]] 返回 true |
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator4.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator4.sh
+#!/bin/bash
+
+a=10
+b=20
+
+if [[ $a -lt 100 && $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+
+if [[ $a -lt 100 || $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh  operator4.sh
+返回 false
+返回 true
+```
+
+
+
+
+
+## 字符串运算符
+
+| 运算符 | 说明                                      | 举例                     |
+| :----- | :---------------------------------------- | :----------------------- |
+| =      | 检测两个字符串是否相等，相等返回 true。   | [ $a = $b ] 返回 false。 |
+| !=     | 检测两个字符串是否相等，不相等返回 true。 | [ $a != $b ] 返回 true。 |
+| -z     | 检测字符串长度是否为0，为0返回 true。     | [ -z $a ] 返回 false。   |
+| -n     | 检测字符串长度是否为0，不为0返回 true。   | [ -n "$a" ] 返回 true。  |
+| $      | 检测字符串是否为空，不为空返回 true。     | [ $a ] 返回 true。       |
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator5.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator5.sh
+#!/bin/bash
+a="abc"
+b="efg"
+
+if [ $a = $b ]
+then
+   echo "$a = $b : a 等于 b"
+else
+   echo "$a = $b: a 不等于 b"
+fi
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a != $b: a 等于 b"
+fi
+if [ -z $a ]
+then
+   echo "-z $a : 字符串长度为 0"
+else
+   echo "-z $a : 字符串长度不为 0"
+fi
+if [ -n "$a" ]
+then
+   echo "-n $a : 字符串长度不为 0"
+else
+   echo "-n $a : 字符串长度为 0"
+fi
+if [ $a ]
+then
+   echo "$a : 字符串不为空"
+else
+   echo "$a : 字符串为空"
+fi
+
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh  operator5.sh
+abc = efg: a 不等于 b
+abc != efg : a 不等于 b
+-z abc : 字符串长度不为 0
+-n abc : 字符串长度不为 0
+abc : 字符串不为空
+```
+
+
+
+## 文件测试运算符
+
+文件测试运算符用于检测 Unix 文件的各种属性。
+
+| 操作符  | 说明                                                         | 举例                      |
+| :------ | :----------------------------------------------------------- | :------------------------ |
+| -b file | 检测文件是否是块设备文件，如果是，则返回 true。              | [ -b $file ] 返回 false。 |
+| -c file | 检测文件是否是字符设备文件，如果是，则返回 true。            | [ -c $file ] 返回 false。 |
+| -d file | 检测文件是否是目录，如果是，则返回 true。                    | [ -d $file ] 返回 false。 |
+| -f file | 检测文件是否是普通文件（既不是目录，也不是设备文件），如果是，则返回 true。 | [ -f $file ] 返回 true。  |
+| -g file | 检测文件是否设置了 SGID 位，如果是，则返回 true。            | [ -g $file ] 返回 false。 |
+| -k file | 检测文件是否设置了粘着位(Sticky Bit)，如果是，则返回 true。  | [ -k $file ] 返回 false。 |
+| -p file | 检测文件是否是有名管道，如果是，则返回 true。                | [ -p $file ] 返回 false。 |
+| -u file | 检测文件是否设置了 SUID 位，如果是，则返回 true。            | [ -u $file ] 返回 false。 |
+| -r file | 检测文件是否可读，如果是，则返回 true。                      | [ -r $file ] 返回 true。  |
+| -w file | 检测文件是否可写，如果是，则返回 true。                      | [ -w $file ] 返回 true。  |
+| -x file | 检测文件是否可执行，如果是，则返回 true。                    | [ -x $file ] 返回 true。  |
+| -s file | 检测文件是否为空（文件大小是否大于0），不为空返回 true。     | [ -s $file ] 返回 true。  |
+| -e file | 检测文件（包括目录）是否存在，如果是，则返回 true。          | [ -e $file ] 返回 true。  |
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz operator]# vim operator6.sh
+[root@iz2zegdhs7pd191av8n8dmz operator]# cat operator6.sh
+#!/bin/bash
+
+file="/whl/shell/operator/test.sh"
+if [ -r $file ]
+then
+   echo "文件可读"
+else
+   echo "文件不可读"
+fi
+if [ -w $file ]
+then
+   echo "文件可写"
+else
+   echo "文件不可写"
+fi
+if [ -x $file ]
+then
+   echo "文件可执行"
+else
+   echo "文件不可执行"
+fi
+if [ -f $file ]
+then
+   echo "文件为普通文件"
+else
+   echo "文件为特殊文件"
+fi
+if [ -d $file ]
+then
+   echo "文件是个目录"
+else
+   echo "文件不是个目录"
+fi
+if [ -s $file ]
+then
+   echo "文件不为空"
+else
+   echo "文件为空"
+fi
+if [ -e $file ]
+then
+   echo "文件存在"
+else
+   echo "文件不存在"
+fi
+[root@iz2zegdhs7pd191av8n8dmz operator]# sh  operator6.sh
+文件可读
+文件可写
+文件可执行
+文件为普通文件
+文件不是个目录
+文件不为空
+文件存在
+```
 
 
 
 # Shell中的流程控制
 
+## if判断
 
+if语句语法格式：
+
+```shell
+if condition
+then
+    command1 
+    command2
+    ...
+    commandN 
+fi
+```
+
+
+
+if-else语句语法格式：
+
+```shell
+if condition
+then
+    command1 
+    command2
+    ...
+    commandN
+else
+    command
+fi
+```
+
+注意:**如果else分支中没有语句执行，就不要加else分支**
+
+
+
+if else-if else语句语法格式:
+
+```shell
+if condition1
+then
+    command1
+elif condition2 
+then 
+    command2
+else
+    commandN
+fi
+```
+
+
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim if.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat if.sh
+#!/bin/bash
+
+a=10
+b=20
+c=10
+
+if [ $a -eq $c ]
+then
+	echo "a -eq c is true"
+fi
+
+if [ $a -eq $b ]
+then
+	echo "a -eq b is true"
+else 
+	echo "a -eq b is false"
+fi
+
+if [ $a -eq $b ]
+then 
+	echo "a -eq b is true"
+elif [ $b -eq $c ]
+then 
+	echo "b -eq c is true"
+else
+	echo "a -eq b is false,b -eq c is false"
+fi
+	
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh if.sh
+a -eq c is true
+a -eq b is false
+a -eq b is false,b -eq c is false
+
+```
+
+
+
+
+
+## for循环
+
+for循环一般格式为：
+
+```shell
+for var in item1 item2 ... itemN
+do
+    command1
+    command2
+    ...
+    commandN
+done
+```
+
+
+
+for循环输出数字:
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim for.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat for.sh
+#!/bin/bash
+for loop in 1 2 3 4 5
+do
+    echo "The value is: $loop"
+done
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh for.sh
+The value is: 1
+The value is: 2
+The value is: 3
+The value is: 4
+The value is: 5
+```
+
+
+
+
+
+for循环输出字符串中的字符:
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim for2.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat for2.sh
+#!/bin/bash
+for loop in "I LOVE YOU !"
+do
+    echo  $loop
+done
+
+for loop in I LOVE YOU !
+do
+    echo  $loop
+done
+
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh for2.sh
+I LOVE YOU !
+I
+LOVE
+YOU
+!
+```
+
+
+
+
+
+
+
+## while循环
+
+while循环用于不断执行一系列命令，也用于从输入文件中读取数据；命令通常为测试条件。其格式为：
+
+```shell
+while condition
+do
+    command
+done
+```
+
+
+
+案例:
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim while.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat while.sh
+#!/bin/bash
+
+count=1
+while(( $count <= 5 ))
+do
+    echo $count
+    let "count++"
+done
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh while.sh
+1
+2
+3
+4
+5
+```
+
+Bash let 命令用于执行一个或多个表达式，变量计算中不需要加上 $ 来表示变量
+
+
+
+## until循环
+
+until 循环执行一系列命令直至条件为 true 时停止, until 循环与 while 循环在处理方式上刚好相反。
+
+语法格式:
+
+```shell
+until condition
+do
+    command
+done
+```
+
+condition 一般为条件表达式，**如果返回值为 false，则继续执行循环体内的语句，否则跳出循环**。
+
+
+
+案例：
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim until.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat until.sh
+#!/bin/bash
+
+a=0
+
+until [ ! $a -lt 10 ]
+do
+   echo $a
+   a=`expr $a + 1`
+done
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh until.sh
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+
+
+
+
+## case语句
+
+Shell case语句为多选择语句。可以用case语句匹配一个值与一个模式，如果匹配成功，执行相匹配的命令。
+
+case语句格式：
+
+```shell
+case 值 in
+模式1)
+    command
+    ;;
+模式2）
+    command
+    ;;
+esac
+```
+
+case工作方式如上所示。取值后面必须为单词in，每一模式必须以右括号结束。取值可以为变量或常数。匹配发现取值符合某一模式后，其间所有命令开始执行直至 ;;。
+
+取值将检测匹配的每一个模式。一旦模式匹配，则执行完匹配模式相应命令后不再继续其他模式。如果无一匹配模式，使用星号 * 捕获该值，再执行后面的命令。
+
+
+
+案例:
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim case.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat case.sh
+#!/bin/bash
+
+echo '输入 1 到 4 之间的数字:'
+echo '你输入的数字为:'
+read aNum
+case $aNum in
+    1)  echo '你选择了 1'
+        ;;
+    2)  echo '你选择了 2'
+	;;
+    3)  echo '你选择了 3'
+        ;;
+    4)  echo '你选择了 4'
+        ;;
+    *)  echo '你没有输入 1 到 4 之间的数字'
+	;;
+esac
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh case.sh
+输入 1 到 4 之间的数字:
+你输入的数字为:
+5
+你没有输入 1 到 4 之间的数字
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh case.sh
+输入 1 到 4 之间的数字:
+你输入的数字为:
+2
+你选择了 2
+```
+
+
+
+
+
+
+
+## break和continue
+
+在循环过程中，有时候需要在未达到循环结束条件时强制跳出循环，Shell使用两个命令来实现该功能：break和continue。
+
+break命令允许跳出所有循环（终止执行后面的所有循环）。
+
+continue命令与break命令类似，只有一点差别，它不会跳出所有循环，仅仅跳出当前循环。
+
+
+
+break命令案例：
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim break.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat break.sh
+#!/bin/bash
+while :
+do
+    echo -n "输入 1 到 5 之间的数字:"
+    read aNum
+    case $aNum in
+	 1|2|3|4|5) 
+	 	echo "你输入的数字为 $aNum!"
+		;;
+	*)
+		echo "你输入的数字不是 1 到 5 之间的! "
+	        break
+		;;
+   esac
+done
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh break.sh
+输入 1 到 5 之间的数字:6
+你输入的数字不是 1 到 5 之间的! 
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh break.sh
+输入 1 到 5 之间的数字:3
+你输入的数字为 3!
+输入 1 到 5 之间的数字:2
+你输入的数字为 2!
+输入 1 到 5 之间的数字:1
+你输入的数字为 1!
+输入 1 到 5 之间的数字:4
+你输入的数字为 4!
+输入 1 到 5 之间的数字:
+```
+
+
+
+
+
+continue命令案例:
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# vim continue.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# cat continue.sh
+#!/bin/bash 
+while :
+do   
+	echo -n "输入 1 到 5 之间的数字: "     
+read aNum     
+case $aNum in         
+	1|2|3|4|5) 
+		echo "你输入的数字为 $aNum!"         
+		;;         
+	*) 
+		echo "你输入的数字不是 1 到 5 之间的!"             
+		continue                      
+		;;     
+esac 
+done
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# sh continue.sh
+输入 1 到 5 之间的数字: 1
+你输入的数字为 1!
+输入 1 到 5 之间的数字: 2
+你输入的数字为 2!
+输入 1 到 5 之间的数字: 3
+你输入的数字为 3!
+输入 1 到 5 之间的数字: 4
+你输入的数字为 4!
+输入 1 到 5 之间的数字: 5
+你输入的数字为 5!
+输入 1 到 5 之间的数字: 6
+你输入的数字不是 1 到 5 之间的!
+输入 1 到 5 之间的数字: 7
+你输入的数字不是 1 到 5 之间的!
+输入 1 到 5 之间的数字: 8
+你输入的数字不是 1 到 5 之间的!
+输入 1 到 5 之间的数字: 9
+你输入的数字不是 1 到 5 之间的!
+输入 1 到 5 之间的数字: 
+```
 
 
 
 # Shell中的函数
+
+Shell中的函数有两种，一种是系统函数，一种是自定义函数
+
+
+
+## 系统函数
+
+
+
+
+
+## 自定义函数
+
+
+
+
+
