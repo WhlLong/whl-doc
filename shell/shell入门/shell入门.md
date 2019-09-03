@@ -1267,11 +1267,93 @@ Shell中的函数有两种，一种是系统函数，一种是自定义函数
 
 ## 系统函数
 
+关于系统函数，翻了网上的教程，大都只提到两个，basename和dirname
 
+### basename
+
+基本语法：
+
+basename [string / pathname] [suffix]
+
+basename命令会删掉所有的前缀包括最后一个（‘/’）字符，然后将字符串显示出来。
+
+suffix为后缀，如果suffix被指定了，basename会将pathname或string中的suffix去掉。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# basename /whl/shell/flowcontrol/if.sh
+if.sh
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# basename /whl/shell/flowcontrol/if.sh .sh
+if
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# basename /whl/shell/flowcontrol/if.sh h
+if.s
+```
+
+
+
+### dirname
+
+基本语法：
+
+dirname  filepath
+
+dirname  函数的作用是从给定的包含绝对路径的文件名中去除文件名（非目录的部分），然后返回剩下的路径（目录的部分）
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz flowcontrol]# dirname /whl/shell/flowcontrol/if.sh 
+/whl/shell/flowcontrol
+```
 
 
 
 ## 自定义函数
+
+基本语法：
+
+```shell
+[ function ] funname[()]
+{
+	Action;
+	[return int;]
+}
+funname
+```
+
+
+
+注意：
+
+1. 必须在调用函数地方之前，**必须先声明函数**，shell脚本是逐行运行。
+2. 函数返回值，只能通过**$?**系统变量获得，可以显示加return返回，如果不加，将以最后一条命令运行结果，作为返回值。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz function]# vim function.sh
+[root@iz2zegdhs7pd191av8n8dmz function]# cat function.sh
+
+#!/bin/bash
+function sum1()
+{
+    s=0
+    s=$[ $1 + $2 ]
+}
+
+function sum2(){
+	s=0
+	s=$[ $1 + $2 ]
+	return $s
+}
+
+
+sum1 1 2;
+echo "result1= $?"
+
+sum2 1 2;
+echo "result2= $?"
+
+
+[root@iz2zegdhs7pd191av8n8dmz function]# sh function.sh
+result1= 0
+result2= 3
+```
 
 
 
