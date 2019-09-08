@@ -75,7 +75,9 @@ awk中的分隔符分为输入分隔符和输出分隔符两种。
 
 
 
-	## 输入分隔符
+## 输入分隔符
+
+
 
 设置输入分隔符有两种方式  一种是使用-F来设置，还有一种是使用-v,通过设置内置变量FS来设置分隔符。比如-v FS='*'
 
@@ -104,19 +106,7 @@ awk在处理每一行文本时，都是以空格作为默认的输出分隔符�
 root*x*0*0*root
 ```
 
-
-
 上面这个案例通过-F将输入分隔符设置为‘:’,将输出分隔符设置为“*”
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -131,11 +121,77 @@ root*x*0*0*root
 | FILENAME | 当前输入文件的名。                                           |
 | NR       | 表示记录数，在执行过程中对应于当前的行号                     |
 | FNR      | 同NR :，但相对于当前文件。                                   |
-| FS       | 字段分隔符（默认是任何空格）。                               |
-| NF       | 表示字段数，在执行过程中对应于当前的字段数。 `print $NF`答应一行中最后一个字段 |
+| NF       | 表示字段数，在执行过程中对应于当前的字段数。 `print $NF`打印一行中最后一个字段 |
+| FS       | 输入字段列分隔符（默认是任何空格）。                         |
 | OFS      | 输出字段分隔符（默认值是一个空格）。                         |
-| ORS      | 输出记录分隔符（默认值是一个换行符）。                       |
-| RS       | 输入记录分隔符（默认是一个换行符）。                         |
+| ORS      | 输出记录行分隔符（默认值是一个换行符）。                     |
+| RS       | 输入记录行分隔符（默认是一个换行符）。                       |
+
+
+
+
+
+## NR和NF
+
+NR代表记录数，表示每一行的行号，NF表示每一行有几列
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# vim info1.txt
+[root@iz2zegdhs7pd191av8n8dmz awk]# cat info1.txt
+118 tery 35ygr 4653tg 
+346t 35t34eqe y6y  8i33 653
+24e2 24r2 ygh fds gfd ghe u7u
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{print NR,NF}' info1.txt
+1 4
+2 5
+3 7
+```
+
+info1.txt这个文件中一共有三行数据，通过空格隔开，第一行有四列，第二行有五列，第三行有七列。
+
+
+
+## FNR
+
+FNR也是用来显示行号的。
+
+但是如果awk同时处理多个文件，那么情况如下：
+
+```
+[root@iz2zegdhs7pd191av8n8dmz awk]# vim info1.txt
+[root@iz2zegdhs7pd191av8n8dmz awk]# cat info1.txt
+118 tery 35ygr 4653tg 
+346t 35t34eqe y6y  8i33 653
+24e2 24r2 ygh fds gfd ghe u7u
+
+[root@iz2zegdhs7pd191av8n8dmz awk]# vim info2.txt
+[root@iz2zegdhs7pd191av8n8dmz awk]# cat info2.txt
+e3rty eete rte4 gvdfg
+42342 fsr34  gdgd
+543t fsweefw
+
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{print NR,NF}' info1.txt info2.txt
+1 4
+2 5
+3 7
+4 4
+5 3
+6 2
+```
+
+
+
+可以看到在处理多个文件时，awk使用NR输出的行号是多个文件汇总后的结果，而不是指定行在具体文件中的行号，如果我们希望打印出每一行在指定文件中的行号，就可以使用FNR来输出：
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{print FNR,NF}' info1.txt info2.txt
+1 4
+2 5
+3 7
+1 4
+2 3
+3 2
+```
 
 
 
@@ -143,13 +199,102 @@ root*x*0*0*root
 
 
 
+## RS
+
+RS这个变量代表的是输入记录行分隔符，默认行分隔符就是我们所理解的回车换行。
+
+那么如果我们要把行分隔符修改为一个空格呢？
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk -v RS=" " '{print NR,$0}' info2.txt
+1 e3rty
+2 eete
+3 rte4
+4 gvdfg
+42342
+5 fsr34
+6 
+7 gdgd
+543t
+8 fsweefw
+```
 
 
 
 
 
+## ORS
+
+ORS是输出记录行分隔符，与RS对应。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk -v ORS="**" '{print NR,$0}' info2.txt
+1 e3rty eete rte4 gvdfg**2 42342 fsr34  gdgd**3 543t fsweefw**
+```
 
 
 
 
+
+## FILENAME
+
+FILENAME代表的是当前文件的文件名
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk  '{print FILENAME,NR,$0}' info2.txt
+info2.txt 1 e3rty eete rte4 gvdfg
+info2.txt 2 42342 fsr34  gdgd
+info2.txt 3 543t fsweefw
+```
+
+
+
+## ARGV
+
+ARGV代表当前awk命令中的参数的数量
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print ARGV[1],ARGV[2]}' info1.txt info2.txt
+info1.txt info2.txt
+
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print ARGV[0],ARGV[1],ARGV[2]}' info1.txt info2.txt
+awk info1.txt info2.txt
+
+```
+
+ARGV[0]代表的参数是awk，在awk命令中，awk本身被看做是参数，不过'pattern{action}'并不会被看做是参数
+
+
+
+
+
+## ARGC
+
+ARGC代表的事awk命令中参数的数量
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print ARGC}' info1.txt info2.txt
+3
+```
+
+
+
+
+
+## 自定义变量
+
+awk中自定义变量的方法有两种：
+
+1. 通过-v var=val来定义，变量名区分大小写
+2. 在program中直接定义
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk -v var="value" 'BEGIN{print var}' info1.txt
+value
+
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{var2="value2";print var2}' info1.txt
+value2
+```
 
