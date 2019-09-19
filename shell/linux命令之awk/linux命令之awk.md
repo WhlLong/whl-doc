@@ -433,3 +433,363 @@ awk '/正则表达式1/,/正则表达式2/{action}' file
 
 # 动作
 
+awk中的动作，也就是action这一部分，我们应该比较熟悉了。。它的基本结构是：
+
+```shell
+{ action }
+```
+
+{}内部可以是一条语句，也可以是多条语句，比如之前我们用到的print $0就是一条语句。
+
+除了print这种直接的执行语句，{}内部还可以使用一些条件判断，循环等等,它们的用法和书写格式与java中的格式几乎一样。
+
+
+
+## 多条语句
+
+注意： 多条语句之间需要以 ; 隔开,
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# cat info1.txt
+118 tery 35ygr 4653tg 
+346t 35t34eqe y6y  8i33 653
+24e2 24r2 ygh fds gfd ghe u7u
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{print $1;print $2}' info1.txt
+118
+tery
+346t
+35t34eqe
+24e2
+24r2
+```
+
+
+
+
+
+## if条件判断
+
+if条件判断中的条件判断需要放在()中，其包含的动作语句需要放在{}中
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{if($1==118){print $1;print $2}}' info1.txt
+118
+tery
+```
+
+
+
+
+
+
+
+## for循环
+
+for循环分为两种。
+
+for循环语法格式一：
+
+for（初始化；布尔表达式；更新）{
+
+​	//动作语句
+
+}
+
+```
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{for(i=1;i<=5;i++){print i}}' info1.txt
+1
+2
+3
+4
+5
+```
+
+
+
+for循环语法格式二：
+
+for( 变量 in 数组 ){
+
+​	//动作语句
+
+}
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr[1]="one";arr[2]="two";arr[3]="three";for(i in arr){print i;print arr[i]}}' info1.txt
+1
+one
+2
+two
+3
+three
+```
+
+
+
+## while循环
+
+while循环也分为两种
+
+while循环语法格式一：
+
+while( 布尔表达式 ){
+
+​	//动作语句
+
+}
+
+```
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{i=1;while(i <= 5){print i;i++}}' info1.txt
+1
+2
+3
+4
+5
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{i=1;while(i <= 0){print i;i++}}' info1.txt
+[root@iz2zegdhs7pd191av8n8dmz awk]# 
+
+```
+
+
+
+
+
+while循环语法格式二：
+
+do{
+
+​	//动作语句
+
+}while( 布尔表达式 )
+
+
+
+while循环与do while循环的区别是： 如果while循环中的布尔表达式结果为false，那么while循环中的动作语句可能一次也不会执行，但是do while循环会先执行一次动作语句，然后再去判断布尔表达式的值来决定要不要继续执行，所以do while循环至少要执行一次动作语句。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{i=1;do{print i;i++}while(i<=5)}' info1.txt
+1
+2
+3
+4
+5
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{i=1;do{print i;i++}while(i<=0)}' info1.txt
+1
+```
+
+
+
+
+
+## continue与break
+
+continue和break都可以用来跳出循环，不同的是continue只会结束本次动作，后面的循环依旧会继续，而break则是会结束整个循环，后面未执行的循环也不会再执行。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{for(i=1;i<=5;i++){if(i==3){continue};print i}}' info1.txt
+1
+2
+4
+5
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{for(i=1;i<=5;i++){if(i==3){break};print i}}' info1.txt
+1
+2
+```
+
+
+
+
+
+
+
+## exit
+
+exit可以用来结束余下未执行的全部的awk模式匹配和动作执行，直接进入END模式。
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{for(i=1;i<=5;i++){if(i==3){break};print i}} {print $0}  END{print "END..."}' info1.txt
+1
+2
+118 tery 35ygr 4653tg 
+346t 35t34eqe y6y  8i33 653
+24e2 24r2 ygh fds gfd ghe u7u
+END...
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{for(i=1;i<=5;i++){if(i==3){exit};print i}} {print $0}  END{print "END..."}' info1.txt
+1
+2
+END...
+```
+
+
+
+
+
+# 数组
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr[1]="one";arr[2]="two";arr[3]="three";for(i in arr){print i;print arr[i]}}' info1.txt
+1
+one
+2
+two
+3
+three
+```
+
+
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  for(i in arr){print i;print arr[i]}}' info1.txt
+three
+3
+two
+2
+one
+1
+```
+
+
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  if("two" in arr){print "two"};if("four" in arr){print "four"}}' info1.txt
+two
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  for(i=1;i<10;i++){arr["one"]=i;print arr["one"]}}' info1.txt
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+
+
+# 内置函数
+
+
+
+## 算数函数
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print rand()}'
+0.237788
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print rand()}'
+0.237788
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print rand()}'
+0.237788
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print rand()}'
+0.399304
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print rand()}'
+0.713137
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print rand()}'
+0.782504
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
+8.08286
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
+21.1003
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
+85.3872
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
+40.5307
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
+80
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
+12
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
+73
+```
+
+
+
+
+
+## 字符串函数
+
+gsub函数与sub函数
+
+gsub函数会替换指定范围内所有符合条件的字符。
+
+sub函数只会替换指定范围内第一次匹配到的符合条件的字符。
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# cat info1.txt
+118 tery 35ygr 4653tg 
+346t 35t34eqe y6y  8i33 653
+24e2 24r2 ygh fds gfd ghe u7u
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{gsub("4","s",$1);print $0}' info1.txt
+118 tery 35ygr 4653tg 
+3s6t 35t34eqe y6y 8i33 653
+2se2 24r2 ygh fds gfd ghe u7u
+
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{gsub("4","s",$0);print $0}' info1.txt
+118 tery 35ygr s653tg 
+3s6t 35t3seqe y6y  8i33 653
+2se2 2sr2 ygh fds gfd ghe u7u
+```
+
+
+
+```shell
+[root@iz2zegdhs7pd191av8n8dmz awk]# awk '{gsub("[a-z]","s",$0);print $0}' info1.txt
+118 ssss 35sss 4653ss 
+346s 35s34sss s6s  8s33 653
+24s2 24s2 sss sss sss sss s7s
+```
+
+
+
+length函数可以获取字符串的长度，传参时获取参数的长度，不传参时取整行的长度。
+
+
+
+index函数可以获取字符位于整个字符串中的位置
+
+
+
+split函数可以将指定的字符串按照指定的分隔符切割，切割后的每一段复制到数组的元素中，从而动态的创建数组。split函数分割产生的数组，其下标从1开始。
+
+
+
+## 其他函数
+
+asort函数与asorti函数
+
+asort函数可以根据元素的值进行排序。
+
+asorti函数可以根据元素的下标进行排序。
