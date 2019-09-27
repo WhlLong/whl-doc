@@ -626,6 +626,8 @@ END...
 
 # 数组
 
+在其他语言中，可能你想要使用数组，不管是赋值操作还是取值操作，都需要先声明数组，然后才能使用这个数组。但是在awk中的数组不需要先声明，直接给数组某个下标赋值或者取值就可以了。
+
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr[1]="one";arr[2]="two";arr[3]="three";for(i in arr){print i;print arr[i]}}' info1.txt
 1
@@ -640,6 +642,8 @@ three
 
 
 
+另外一个不同于其他语言的地方是，awk中的数组可以使用字符串作为下标，这有点类似于java中的map。
+
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  for(i in arr){print i;print arr[i]}}' info1.txt
 three
@@ -652,7 +656,7 @@ one
 
 
 
-
+awk中的数组可以使用in来判断某个下标是否存在.如果直接通过下标来判断，那么当该下标不存在时awk会自动创建这个下标，并且将它赋值为空字符串。
 
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  if("two" in arr){print "two"};if("four" in arr){print "four"}}' info1.txt
@@ -660,6 +664,8 @@ two
 ```
 
 
+
+awk中的数组也可以使用for循环来进行遍历
 
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]#  awk 'BEGIN{arr["one"]=1;arr["two"]=2;arr["three"]=3;  for(i=1;i<10;i++){arr["one"]=i;print arr["one"]}}' info1.txt
@@ -682,7 +688,7 @@ two
 
 ## 算数函数
 
-
+awk中可以使用rand函数来生成随机数，但是如果只使用rand方法，那么每次生成的随机数是不变的。
 
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{print rand()}'
@@ -694,6 +700,8 @@ two
 ```
 
 
+
+rand函数一般还需要和srand函数配合使用。
 
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print rand()}'
@@ -706,6 +714,8 @@ two
 
 
 
+上面的例子生成的随机数都是小数，如果想要生成整数随机数，比如100以内的随机整数，可以将上面生成的随机数乘以100，然后通过int函数来截取整数部分。
+
 ```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
 8.08286
@@ -715,11 +725,6 @@ two
 85.3872
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print 100*rand()}'
 40.5307
-```
-
-
-
-```shell
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
 80
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
@@ -727,8 +732,6 @@ two
 [root@iz2zegdhs7pd191av8n8dmz awk]# awk 'BEGIN{srand();print int(100*rand())}'
 73
 ```
-
-
 
 
 
@@ -793,3 +796,4 @@ asort函数与asorti函数
 asort函数可以根据元素的值进行排序。
 
 asorti函数可以根据元素的下标进行排序。
+
